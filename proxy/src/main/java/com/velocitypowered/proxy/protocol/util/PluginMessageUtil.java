@@ -121,9 +121,9 @@ public final class PluginMessageUtil {
    * @return the rewritten plugin message
    */
   public static PluginMessage rewriteMinecraftBrand(PluginMessage message, ProxyVersion version,
-      ProtocolVersion protocolVersion) {
+                                                    ProtocolVersion protocolVersion) {
     String currentBrand = readBrandMessage(message.content());
-    return rewriteMinecraftBrand(message, String.format("%s (%s)", currentBrand, version.getName()), version, protocolVersion);
+    return rewriteMinecraftBrand(message, String.format("%s (%s)", currentBrand, version.getName()), protocolVersion);
   }
 
   /**
@@ -133,7 +133,7 @@ public final class PluginMessageUtil {
    * @return the rewritten plugin message
    */
   public static PluginMessage rewriteMinecraftBrand(PluginMessage message, String rewrittenBrand,
-                                                    ProxyVersion version, ProtocolVersion protocolVersion) {
+                                                    ProtocolVersion protocolVersion) {
     checkNotNull(message, "message");
     checkArgument(isMcBrand(message), "message is not a brand plugin message");
 
