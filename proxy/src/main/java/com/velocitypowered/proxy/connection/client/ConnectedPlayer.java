@@ -691,7 +691,12 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
     }
 
     if (serversToTry.isEmpty()) {
-      serversToTry = server.getConfiguration().getAttemptConnectionOrder();
+      List<String> connOrder = server.getConfiguration().getAttemptConnectionOrder();
+      if (connOrder.isEmpty()) {
+        return Optional.empty();
+      } else {
+        serversToTry = connOrder;
+      }
     }
 
     for (int i = tryIndex; i < serversToTry.size(); i++) {
