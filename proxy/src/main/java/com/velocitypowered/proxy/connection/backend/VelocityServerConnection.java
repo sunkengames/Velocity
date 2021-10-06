@@ -23,7 +23,7 @@ import static com.velocitypowered.proxy.network.Connections.HANDLER;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.velocitypowered.api.event.player.ServerPreDisconnectEvent;
+import com.velocitypowered.api.event.connection.PreDisconnectEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
@@ -233,14 +233,13 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
       gracefulDisconnect = true;
 
       // Sunken
-      // Sanity check
-      if (proxyPlayer.getConnectedServer() == this) {
-        // Fire ServerPreDisconnectEvent
-        ServerPreDisconnectEvent event = new ServerPreDisconnectEvent(proxyPlayer, registeredServer);
+      if (proxyPlayer.getConnectedServer() == this) { // Sanity check
+        // Fire PreDisconnectEvent
+        PreDisconnectEvent event = new PreDisconnectEvent(proxyPlayer, registeredServer);
         try {
           server.getEventManager().fire(event).get();
         } catch (InterruptedException | ExecutionException e) {
-          logger.error("Unable to fire server pre-disconnect event", e);
+          logger.error("Unable to fire pre-disconnect event", e);
         }
       }
 

@@ -5,21 +5,21 @@
  * reference the LICENSE file in the api top-level directory.
  */
 
-package com.velocitypowered.api.event.player;
+package com.velocitypowered.api.event.connection;
 
 import com.google.common.base.Preconditions;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 /**
- * This event is fired before disconnecting from their current server.
+ * This event is fired before disconnecting from the proxy.
  */
-public final class ServerPreDisconnectEvent {
+public final class PreDisconnectEvent {
 
   private final Player player;
   private final RegisteredServer server;
 
-  public ServerPreDisconnectEvent(Player player, RegisteredServer server) {
+  public PreDisconnectEvent(Player player, RegisteredServer server) {
     this.player = Preconditions.checkNotNull(player, "player");
     this.server = Preconditions.checkNotNull(server, "server");
   }
@@ -34,7 +34,7 @@ public final class ServerPreDisconnectEvent {
 
   @Override
   public String toString() {
-    return "ServerPreDisconnectEvent{"
+    return "PreDisconnectEvent{"
         + "player=" + player
         + ", server=" + server
         + '}';
