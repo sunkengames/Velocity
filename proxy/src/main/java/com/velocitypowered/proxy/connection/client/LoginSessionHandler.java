@@ -293,6 +293,7 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
     server.getEventManager().fire(new LoginEvent(player))
         .thenAcceptAsync(event -> {
           if (mcConnection.isClosed()) {
+            // Sunken
             server.getEventManager().fireAndForget(new PreDisconnectEvent(player));
 
             // The player was disconnected

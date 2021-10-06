@@ -1,3 +1,10 @@
+/*
+ * Copyright (C) 2021 Sunken Games
+ *
+ * The Velocity API is licensed under the terms of the MIT License. For more details,
+ * reference the LICENSE file in the api top-level directory.
+ */
+
 package com.velocitypowered.api.event.connection;
 
 import com.google.common.base.Preconditions;
