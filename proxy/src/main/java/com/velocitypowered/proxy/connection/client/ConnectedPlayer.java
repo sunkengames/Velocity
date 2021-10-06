@@ -750,41 +750,36 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
   }
 
   void teardown() {
-    // Sunken
-    // Fire pre-disconnect event
-    PreDisconnectEvent preDisconnect = new PreDisconnectEvent(this);
-    server.getEventManager().fire(preDisconnect).whenComplete((val1, ex1) -> {
-      if (connectionInFlight != null) {
-        connectionInFlight.disconnect();
-      }
-      if (connectedServer != null) {
-        connectedServer.disconnect();
-      }
+    if (connectionInFlight != null) {
+      connectionInFlight.disconnect();
+    }
+    if (connectedServer != null) {
+      connectedServer.disconnect();
+    }
 
-      Optional<Player> connectedPlayer = server.getPlayer(this.getUniqueId());
-      server.unregisterConnection(this);
+    Optional<Player> connectedPlayer = server.getPlayer(this.getUniqueId());
+    server.unregisterConnection(this);
 
-      DisconnectEvent.LoginStatus status;
-      if (connectedPlayer.isPresent()) {
-        if (!connectedPlayer.get().getCurrentServer().isPresent()) {
-          status = LoginStatus.PRE_SERVER_JOIN;
-        } else {
-          status = connectedPlayer.get() == this ? LoginStatus.SUCCESSFUL_LOGIN
-                  : LoginStatus.CONFLICTING_LOGIN;
-        }
+    DisconnectEvent.LoginStatus status;
+    if (connectedPlayer.isPresent()) {
+      if (!connectedPlayer.get().getCurrentServer().isPresent()) {
+        status = LoginStatus.PRE_SERVER_JOIN;
       } else {
-        status = connection.isKnownDisconnect() ? LoginStatus.CANCELLED_BY_PROXY :
-                LoginStatus.CANCELLED_BY_USER;
+        status = connectedPlayer.get() == this ? LoginStatus.SUCCESSFUL_LOGIN
+                : LoginStatus.CONFLICTING_LOGIN;
       }
+    } else {
+      status = connection.isKnownDisconnect() ? LoginStatus.CANCELLED_BY_PROXY :
+              LoginStatus.CANCELLED_BY_USER;
+    }
 
-      DisconnectEvent event = new DisconnectEvent(this, status);
-      server.getEventManager().fire(event).whenComplete((val, ex) -> {
-        if (ex == null) {
-          this.teardownFuture.complete(null);
-        } else {
-          this.teardownFuture.completeExceptionally(ex);
-        }
-      });
+    DisconnectEvent event = new DisconnectEvent(this, status);
+    server.getEventManager().fire(event).whenComplete((val, ex) -> {
+      if (ex == null) {
+        this.teardownFuture.complete(null);
+      } else {
+        this.teardownFuture.completeExceptionally(ex);
+      }
     });
   }
 
