@@ -232,11 +232,16 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
     if (connection != null) {
       gracefulDisconnect = true;
 
-      ServerPreDisconnectEvent preDisconnect = new ServerPreDisconnectEvent(proxyPlayer, registeredServer);
-      try {
-        server.getEventManager().fire(preDisconnect).get();
-      } catch (InterruptedException | ExecutionException e) {
-        logger.error("Unable to fire server pre-disconnect event", e);
+      // Sunken
+      // Sanity check
+      if (proxyPlayer.getConnectedServer() == this) {
+        // Fire ServerPreDisconnectEvent
+        ServerPreDisconnectEvent event = new ServerPreDisconnectEvent(proxyPlayer, registeredServer);
+        try {
+          server.getEventManager().fire(event).get();
+        } catch (InterruptedException | ExecutionException e) {
+          logger.error("Unable to fire server pre-disconnect event", e);
+        }
       }
 
       connection.close(false);
