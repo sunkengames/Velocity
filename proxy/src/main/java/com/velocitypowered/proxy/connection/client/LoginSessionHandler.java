@@ -25,11 +25,8 @@ import static com.velocitypowered.proxy.util.EncryptionUtils.decryptRsa;
 import static com.velocitypowered.proxy.util.EncryptionUtils.generateServerId;
 
 import com.google.common.base.Preconditions;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.*;
 import com.velocitypowered.api.event.connection.DisconnectEvent.LoginStatus;
-import com.velocitypowered.api.event.connection.LoginEvent;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent.PreLoginComponentResult;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
@@ -296,6 +293,8 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
     server.getEventManager().fire(new LoginEvent(player))
         .thenAcceptAsync(event -> {
           if (mcConnection.isClosed()) {
+            server.getEventManager().fireAndForget(new PreDisconnectEvent(player));
+
             // The player was disconnected
             server.getEventManager().fireAndForget(new DisconnectEvent(player,
                 LoginStatus.CANCELLED_BY_USER_BEFORE_COMPLETE));
