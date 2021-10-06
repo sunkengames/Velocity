@@ -23,7 +23,7 @@ import static com.velocitypowered.proxy.network.Connections.HANDLER;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.velocitypowered.api.event.connection.PreDisconnectEvent;
+import com.velocitypowered.api.event.player.ServerPreDisconnectEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
@@ -45,15 +45,13 @@ import com.velocitypowered.proxy.server.VelocityRegisteredServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
-import java.net.InetSocketAddress;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.UnaryOperator;
 
 import org.apache.logging.log4j.LogManager;
@@ -234,11 +232,11 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
     if (connection != null) {
       gracefulDisconnect = true;
 
-      PreDisconnectEvent preDisconnect = new PreDisconnectEvent(proxyPlayer);
+      ServerPreDisconnectEvent preDisconnect = new ServerPreDisconnectEvent(proxyPlayer, registeredServer);
       try {
         server.getEventManager().fire(preDisconnect).get();
       } catch (InterruptedException | ExecutionException e) {
-        logger.error("Unable to fire pre-disconnect event", e);
+        logger.error("Unable to fire server pre-disconnect event", e);
       }
 
       connection.close(false);
