@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent.LoginStatus;
+import com.velocitypowered.api.event.connection.PreDisconnectEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent.DisconnectPlayer;
 import com.velocitypowered.api.event.player.KickedFromServerEvent.Notify;
@@ -744,36 +745,41 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
   }
 
   void teardown() {
-    if (connectionInFlight != null) {
-      connectionInFlight.disconnect();
-    }
-    if (connectedServer != null) {
-      connectedServer.disconnect();
-    }
-
-    Optional<Player> connectedPlayer = server.getPlayer(this.getUniqueId());
-    server.unregisterConnection(this);
-
-    DisconnectEvent.LoginStatus status;
-    if (connectedPlayer.isPresent()) {
-      if (!connectedPlayer.get().getCurrentServer().isPresent()) {
-        status = LoginStatus.PRE_SERVER_JOIN;
-      } else {
-        status = connectedPlayer.get() == this ? LoginStatus.SUCCESSFUL_LOGIN
-            : LoginStatus.CONFLICTING_LOGIN;
+    // Sunken
+    // Fire pre-disconnect event
+    PreDisconnectEvent preDisconnect = new PreDisconnectEvent(this);
+    server.getEventManager().fire(preDisconnect).whenComplete((val1, ex1) -> {
+      if (connectionInFlight != null) {
+        connectionInFlight.disconnect();
       }
-    } else {
-      status = connection.isKnownDisconnect() ? LoginStatus.CANCELLED_BY_PROXY :
-          LoginStatus.CANCELLED_BY_USER;
-    }
-
-    DisconnectEvent event = new DisconnectEvent(this, status);
-    server.getEventManager().fire(event).whenComplete((val, ex) -> {
-      if (ex == null) {
-        this.teardownFuture.complete(null);
-      } else {
-        this.teardownFuture.completeExceptionally(ex);
+      if (connectedServer != null) {
+        connectedServer.disconnect();
       }
+
+      Optional<Player> connectedPlayer = server.getPlayer(this.getUniqueId());
+      server.unregisterConnection(this);
+
+      DisconnectEvent.LoginStatus status;
+      if (connectedPlayer.isPresent()) {
+        if (!connectedPlayer.get().getCurrentServer().isPresent()) {
+          status = LoginStatus.PRE_SERVER_JOIN;
+        } else {
+          status = connectedPlayer.get() == this ? LoginStatus.SUCCESSFUL_LOGIN
+                  : LoginStatus.CONFLICTING_LOGIN;
+        }
+      } else {
+        status = connection.isKnownDisconnect() ? LoginStatus.CANCELLED_BY_PROXY :
+                LoginStatus.CANCELLED_BY_USER;
+      }
+
+      DisconnectEvent event = new DisconnectEvent(this, status);
+      server.getEventManager().fire(event).whenComplete((val, ex) -> {
+        if (ex == null) {
+          this.teardownFuture.complete(null);
+        } else {
+          this.teardownFuture.completeExceptionally(ex);
+        }
+      });
     });
   }
 
