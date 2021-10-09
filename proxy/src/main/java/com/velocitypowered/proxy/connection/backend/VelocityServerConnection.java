@@ -232,17 +232,6 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
     if (connection != null) {
       gracefulDisconnect = true;
 
-      // Sunken
-      if (proxyPlayer.getConnectedServer() == this) { // Sanity check
-        // Fire PreDisconnectEvent
-        PreDisconnectEvent event = new PreDisconnectEvent(proxyPlayer, registeredServer);
-        try {
-          server.getEventManager().fire(event).get();
-        } catch (InterruptedException | ExecutionException e) {
-          logger.error("Unable to fire pre-disconnect event", e);
-        }
-      }
-
       connection.close(false);
       connection = null;
     }

@@ -1052,7 +1052,20 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
                   VelocityRegisteredServer vrs = (VelocityRegisteredServer) realDestination;
                   VelocityServerConnection con = new VelocityServerConnection(vrs,
                       ConnectedPlayer.this, server);
+
                   connectionInFlight = con;
+
+                  // Sunken
+                  // Swap server switch procedure
+                  if (connectedServer != null) {
+                    // Shut down the existing server connection.
+                    connectedServer.disconnect();
+                    setConnectedServer(null);
+
+                    // Send keep alive to try to avoid timeouts
+                    sendKeepAlive();
+                  }
+
                   return con.connect().whenCompleteAsync(
                       (result, exception) -> this.resetIfInFlightIs(con), connection.eventLoop());
                 }, connection.eventLoop());
